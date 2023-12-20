@@ -1,0 +1,97 @@
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env
+
+  auth:
+    build:
+      context: ./
+      dockerfile: ./apps/auth/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+  
+  presence:
+    build:
+      context: ./
+      dockerfile: ./apps/presence/Dockerfile
+    ports:
+      - '6000:6000'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev presence # overrides CMD from dockerfile
+
+  chat:
+    build:
+      context: ./
+      dockerfile: ./apps/chat/Dockerfile
+    ports:
+      - '7000:7000'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - redis
+      - presence
+    volumes:
+      - .:/usr/src/app # any change to base folder should be reflected
+      - /usr/src/app/node_modules
+    command: npm run start:dev chat # overrides CMD from dockerfile
+
+  messenger:
+    build:
+      context: ./
+      dockerfile: ./apps/messenger/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "4000:3000"
+    depends_on:
+      - rabbitmq
+      - auth
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev messenger
+
+  postgres:
+    image: postgres
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+
+  redis:
+    image: redis
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASS"
+    env_file:
+      - .env
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/data:/data
