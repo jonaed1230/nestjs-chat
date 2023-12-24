@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { UserCreateDto, UserLoginDto, AddFriendDto } from './dtos/api-docs.dto';
 import { ClientProxy } from '@nestjs/microservices';
 
 import { AuthGuard, UserInterceptor, UserRequest } from '@app/shared';
@@ -37,7 +38,7 @@ export class AppController {
   @Post('add-friend/:friendId')
   async addFriend(
     @Req() req: UserRequest,
-    @Param('friendId') friendId: number,
+    @Param() { friendId }: AddFriendDto,
   ) {
     if (!req?.user) {
       throw new BadRequestException();
@@ -85,10 +86,7 @@ export class AppController {
 
   @Post('auth/register')
   async register(
-    @Body('firstName') firstName: string,
-    @Body('lastName') lastName: string,
-    @Body('email') email: string,
-    @Body('password') password: string,
+    @Body() { firstName, lastName, email, password }: UserCreateDto,
   ) {
     return this.authService.send(
       {
@@ -104,10 +102,7 @@ export class AppController {
   }
 
   @Post('auth/login')
-  async login(
-    @Body('email') email: string,
-    @Body('password') password: string,
-  ) {
+  async login(@Body() { email, password }: UserLoginDto) {
     return this.authService.send(
       {
         cmd: 'login',

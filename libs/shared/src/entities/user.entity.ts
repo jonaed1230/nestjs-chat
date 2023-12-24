@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
 import { ConversationEntity } from './conversation.entity';
 
 import { FriendRequestEntity } from './friend-request.entity';
@@ -15,15 +16,19 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({ example: 'John', description: 'User first name' })
   @Column()
   firstName: string;
 
+  @ApiProperty({ example: 'Doe', description: 'User last name' })
   @Column()
   lastName: string;
 
+  @ApiProperty({ example: 'test@user.com', description: 'User email' })
   @Column({ unique: true })
   email: string;
 
+  @ApiProperty({ example: 'password', description: 'User password' })
   @Column({ select: false })
   password: string;
 
