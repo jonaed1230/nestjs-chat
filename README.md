@@ -1,10 +1,15 @@
-# Messenger Docs
+# NestJS Chat Docs
 
 This is a microservice based on redis, rabbitmq and nestjs.
 
 ### Required Softwares:
 
  - Docker
+
+### Operating System:
+
+  - Linux (preferred)
+  - Windows (not tested)
  ### Run Instructions:
  Grab .env file from the developer and run using these commands:
  
